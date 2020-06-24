@@ -1,0 +1,79 @@
+---
+title: "Developing Data Products Week 3 Markdown Assignment"
+author: "Allen Lin"
+date: "6/23/2020"
+output: html_document
+---
+
+## Percentage of total votes in each state cast for Clinton in 2016 Presidential Election
+
+```{r, message = FALSE, echo=FALSE}
+library(plotly)
+data <- read.csv("D:/Datasets/1976-2016-president.csv")
+data <- filter(data, (party == "democrat")  & (writein == FALSE) & (year == 2016)) 
+data <- data %>%
+  mutate(percent_votes = data$candidatevotes/data$totalvotes)%>%
+  mutate(percent_votes_read = round(data$candidatevotes/data$totalvotes*100))
+
+data$hover <- with(data, paste(state, "<br>", "Percent of votes cast for Clinton:", percent_votes_read, "%"))
+borders = list(color=toRGB("purple"))
+map_options <- list(
+  scope = "usa",
+  projection = list(type="albers usa")
+)
+chart <- plot_ly(data, z = ~percent_votes, text = ~hover, locations=~state_po, 
+        type = "choropleth", locationmode = "USA-states",
+        color = ~percent_votes, colors = "Blues", marker = list(line = borders)) %>%
+  layout(title = "Percent Votes Cast for Clinton in the 2016 Election<br><br>", geo = map_options)
+chart
+```
+
+## Percentage of total votes in each state cast for Trump in 2016 Presidential Election
+
+```{r, message = FALSE, echo=FALSE}
+library(plotly)
+data <- read.csv("D:/Datasets/1976-2016-president.csv")
+data <- filter(data, (party == "republican")  & (writein == FALSE) & (year == 2016)) 
+data <- data %>%
+  mutate(percent_votes = data$candidatevotes/data$totalvotes)%>%
+  mutate(percent_votes_read = round(data$candidatevotes/data$totalvotes*100))
+
+data$hover <- with(data, paste(state, "<br>", "Percent of votes cast for Trump:", percent_votes_read, "%"))
+borders = list(color=toRGB("purple"))
+map_options <- list(
+  scope = "usa",
+  projection = list(type="albers usa")
+)
+chart <- plot_ly(data, z = ~percent_votes, text = ~hover, locations=~state_po, 
+        type = "choropleth", locationmode = "USA-states",
+        color = ~percent_votes, colors = "Reds", marker = list(line = borders)) %>%
+  layout(title = "Percent Votes Cast for Clinton in the 2016 Election<br><br>", geo = map_options)
+chart
+```
+
+## Closest states in terms of voting percentages (swing states)
+
+```{r, message = FALSE, echo=FALSE}
+library(plotly)
+library(dplyr)
+data <- read.csv("D:/Datasets/1976-2016-president.csv")
+data <- filter(data, (party == "democrat" | party == "republican")  & (writein == FALSE) & (year == 2016)) 
+data <- data %>%
+  mutate(percent_votes = data$candidatevotes/data$totalvotes)%>%
+  mutate(percent_votes_read = data$candidatevotes/data$totalvotes*100)
+d <- group_by(data, state_po) %>% summarize(m = diff(percent_votes)) %>% arrange(abs(m-1)) %>% slice(c(1:10))
+data<-filter(data, (party=="democrat"))
+data<-data%>%
+  mutate(isten = as.integer(as.numeric(data$state_po %in% d$state_po)))
+data$hover <- with(data, paste(state, "<br>", "Is Swing State?", isten))
+borders = list(color=toRGB("purple"))
+map_options <- list(
+  scope = "usa",
+  projection = list(type="albers usa")
+)
+chart <- plot_ly(data, z = ~isten, text = ~hover, locations=~state_po, 
+        type = "choropleth", locationmode = "USA-states",
+        color = ~isten, colors = "Greens", marker = list(line = borders)) %>%
+  layout(title = "Percent Votes Cast for Clinton in the 2016 Election<br><br>", geo = map_options)
+chart
+```
