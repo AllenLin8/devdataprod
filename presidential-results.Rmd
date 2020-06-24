@@ -2,7 +2,7 @@
 title: "Developing Data Products Week 3 Markdown Assignment"
 author: "Allen Lin"
 date: "6/23/2020"
-output: html_document
+output: ioslides_presentation
 ---
 
 ## Percentage of total votes in each state cast for Clinton in 2016 Presidential Election
